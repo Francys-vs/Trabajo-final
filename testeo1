@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrollytelling Interactivo</title>
+    
+    <style>
+        /* --- ESTILOS CSS --- */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .scrolly-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .sticky-panel {
+            width: 40%;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #graphic-state {
+            height: 80%;
+            background-color: #333; /* Color inicial */
+            color: white;
+            display: flex;
+            flex-direction: column; /* Para centrar contenido */
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            border-radius: 8px;
+            transition: background-color 0.5s ease, color 0.5s ease; /* Transición suave */
+        }
+        /* --- CLASES DE ESTADO (Cambiadas por JavaScript) --- */
+        .bg-state-1 {
+            background-color: #007bff; /* Azul */
+            content: "Visualización 1: Introducción";
+        }
+        .bg-state-2 {
+            background-color: #dc3545; /* Rojo (Alerta) */
+            content: "Visualización 2: El Dato Clave";
+        }
+        .bg-state-3 {
+            background-color: #28a745; /* Verde (Éxito/Conclusión) */
+            content: "Visualización 3: Conclusión";
+        }
+        
+        /* Uso de :before para cambiar el texto del panel fijo con las clases */
+        #graphic-state:not(.bg-state-1):not(.bg-state-2):not(.bg-state-3):before {
+            content: "Panel Inactivo";
+        }
+        #graphic-state.bg-state-1:before { content: "Visualización 1: Introducción"; }
+        #graphic-state.bg-state-2:before { content: "Visualización 2: El Dato Clave"; }
+        #graphic-state.bg-state-3:before { content: "Visualización 3: Conclusión"; }
+
+        /* Estilos del texto desplazable */
+        .scroll-narrative {
+            width: 60%;
+            padding-left: 40px;
+        }
+        .scroll-narrative section {
+            min-height: 150vh; /* Altura forzada para el scroll */
+            padding: 20px 0;
+            margin-bottom: 50px;
+            border-left: 4px solid #ccc;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="scrolly-container">
+        <div class="sticky-panel">
+            <div id="graphic-state">
+                </div>
+        </div>
+
+        <div class="scroll-narrative">
+            <section class="step" data-state="bg-state-1">
+                <h2>Paso 1: Introducción (Azul)</h2>
+                <p>Aquí comienza la historia. El panel de la izquierda se vuelve azul. Desplázate hacia abajo para activar la siguiente vista.</p>
+                <p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p>
+            </section>
+            
+            <section class="step" data-state="bg-state-2">
+                <h2>Paso 2: Datos Clave (Rojo)</h2>
+                <p>¡Has llegado al punto crítico! El panel fijo cambia a color rojo para enfatizar el peligro o la importancia del dato.</p>
+                <p>El Intersection Observer está detectando que esta sección está a la vista.</p>
+                <p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p>
+            </section>
+
+            <section class="step" data-state="bg-state-3">
+                <h2>Paso 3: Conclusión (Verde)</h2>
+                <p>Esta es la sección final, que podría mostrar una solución o un resumen. El panel fijo cambia a verde.</p>
+                <p>El Observer elimina la clase roja y añade la clase verde.</p>
+                <p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p><p>Texto de relleno...</p>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // --- CÓDIGO JAVASCRIPT ---
+
+        // 1. Seleccionar los elementos clave
+        const steps = document.querySelectorAll('.step'); // Todas las secciones narrativas
+        const graphicPanel = document.getElementById('graphic-state'); // El panel fijo
+
+        // 2. Opciones para el Intersection Observer
+        // El umbral (threshold) 0.5 significa que la función se ejecuta cuando el 50% del elemento entra/sale de la vista.
+        const options = {
+            root: null, // Observa el viewport (la ventana)
+            rootMargin: '0px',
+            threshold: 0.5 
+        };
+
+        // 3. La función que se ejecuta al cruzar el umbral
+        const observerCallback = (entries, observer) => {
+            entries.forEach(entry => {
+                const stateClass = entry.target.dataset.state; // Obtenemos la clase a aplicar (ej: 'bg-state-1')
+
+                if (entry.isIntersecting) {
+                    // El elemento NARRATIVO ha entrado al 50% de la vista
+                    graphicPanel.className = stateClass; // Aplicar la nueva clase al panel fijo
+                } else {
+                    // Opcional: Podrías querer que el panel fijo mantenga su estado
+                    // hasta que se cruce el siguiente, pero por simplicidad, lo haremos
+                    // cambiar en la entrada.
+                }
+            });
+        };
+
+        // 4. Crear y Ejecutar el Observer
+        const observer = new IntersectionObserver(observerCallback, options);
+
+        // Observar cada sección de la historia
+        steps.forEach(step => {
+            observer.observe(step);
+        });
+    </script>
+</body>
+</html>
